@@ -1,0 +1,57 @@
+version: '3'
+services:
+  redis:
+    image: redis:4.0
+    ports:
+      - "6379:6379"
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '1'
+    # mem_limit: 4g
+
+  filebeat:
+    container_name: filebeat
+    image: docker.elastic.co/beats/filebeat:7.6.1
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./filebeat/filebeat_nginx.yml:/usr/share/filebeat/filebeat.yml
+      - ./filebeat/data:/usr/share/filebeat/data  # 发送数据偏移地址
+      - ./filebeat/files_demo:/tmp  # 数据源
+    logging:
+      options:
+        max-size: "100m"
+  elk:
+    container_name: elk
+    image: sebp/elk #7.6
+    # restart: always # 开机自动重启
+    environment:
+      - ES_MIX_MEM=64m
+      - ES_MAX_MEM=512m
+      - TZ=Asia/Shanghai
+    deploy:
+     resources:
+      limits:
+        cpus: '2'
+        memory: 1G
+    ports:
+      - "5000:5000" # logstash
+      - 9600
+      - "9200:9200" # elasticsearch
+      - "5601:5601" # kibana
+    volumes:
+      - ./kibana/config:/opt/kibana/config
+      - ./kibana/log/:/var/log/kibana/
+      - ./elasticsearch/logs:/opt/elasticsearch/logs
+      - ./elasticsearch/config/:/opt/elasticsearch/config/
+      - ./elasticsearch/log/:/var/log/elasticsearch/
+      - ./logstash/config/:/opt/logstash/config/
+      - ./logstash/pipeline/:/opt/logstash/pipeline/
+      - ./logstash/data/:/opt/logstash/data/ # 持久化队列，死信队列
+      - ./logstash/log/:/var/log/logstash/
+    logging:
+      options:
+        max-size: "500m"
+
+
