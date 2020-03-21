@@ -24,7 +24,7 @@ services:
         max-size: "100m"
   elk:
     container_name: elk
-    image: sebp/elk #7.6
+    image: sebp/elk #7.6.0
     # restart: always # 开机自动重启
     environment:
       - ES_MIX_MEM=64m
