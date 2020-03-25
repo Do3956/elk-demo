@@ -8,17 +8,33 @@ services:
       options:
         max-size: '10m'
         max-file: '1'
-    # mem_limit: 4g
 
-  filebeat:
-    container_name: filebeat
+  filebeat_sample:
+    container_name: filebeat_sample
     image: docker.elastic.co/beats/filebeat:7.6.1
     environment:
       - TZ=Asia/Shanghai
     volumes:
-      - ./filebeat/filebeat_nginx.yml:/usr/share/filebeat/filebeat.yml
+      - ./filebeat/filebeat_sample.yml:/usr/share/filebeat/filebeat.yml
       - ./filebeat/data:/usr/share/filebeat/data  # 发送数据偏移地址
       - ./filebeat/files_demo:/tmp  # 数据源
+    logging:
+      options:
+        max-size: "100m"
+    deploy:
+     resources:
+      limits:
+        cpus: '1'
+        memory: 500m
+  filebeat_content:
+    container_name: filebeat_content
+    image: docker.elastic.co/beats/filebeat:7.6.1
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./filebeat/filebeat_content.yml:/usr/share/filebeat/filebeat.yml
+      # - ./filebeat/data:/usr/share/filebeat/data  # 发送数据偏移地址
+      - /tmp/nginx_log/:/tmp  # 数据源
     logging:
       options:
         max-size: "100m"
@@ -34,10 +50,10 @@ services:
      resources:
       limits:
         cpus: '2'
-        memory: 1G
+        memory: 3G
     ports:
-      - "5000:5000" # logstash
-      - 9600
+      # - "5000:5000" # logstash
+      # - 9600
       - "9200:9200" # elasticsearch
       - "5601:5601" # kibana
     volumes:
@@ -46,8 +62,10 @@ services:
       - ./elasticsearch/logs:/opt/elasticsearch/logs
       - ./elasticsearch/config/:/opt/elasticsearch/config/
       - ./elasticsearch/log/:/var/log/elasticsearch/
-      - ./logstash/config/:/opt/logstash/config/
+      - ./logstash/config/pipelines.yml:/opt/logstash/config/pipelines.yml
+      - ./logstash/config/logstash.yml:/opt/logstash/config/logstash.yml
       - ./logstash/pipeline/:/opt/logstash/pipeline/
+      - ./logstash/template/:/opt/logstash/template/
       - ./logstash/data/:/opt/logstash/data/ # 持久化队列，死信队列
       - ./logstash/log/:/var/log/logstash/
     logging:
@@ -55,3 +73,5 @@ services:
         max-size: "500m"
 
 
+# 为了使用资源限制，用以下命令执行
+# docker-compose --compatibility up -d

@@ -3,4 +3,6 @@
 #   https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
 
 - pipeline.id: main
-  path.config: "/opt/logstash/pipeline/"
+  path.config: "/opt/logstash/pipeline/logstash-sample.conf"
+- pipeline.id: content
+  path.config: "/opt/logstash/pipeline/logstash-content.conf"

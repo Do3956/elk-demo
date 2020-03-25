@@ -1,0 +1,33 @@
+# ------------------------ 输入源 ------------------------
+# filebeat.inputs:
+# - type: stdin
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /tmp/*.log
+
+# ------------------------ 输出源 ------------------------
+
+output.logstash:
+  hosts: ["elk:5001"]
+  timeout: 2
+
+# setup.kibana:
+#   host: "elk:5601"
+
+# output.redis:
+#   hosts: ["redis"]
+# #   password: "my_password"
+#   key: "filebeat"
+#   db: 0
+#   timeout: 2
+
+# output.console:
+#   pretty: true
+
+# ------------------------ 其它配置 ------------------------
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
